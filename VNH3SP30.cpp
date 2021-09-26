@@ -1,4 +1,5 @@
-#include "L298N.h"
+#include "VNH3SP30.h"
+#define CURRENT_COEF 50
 
 //------Motor------
 Motor::Motor(int newPwmPin, int newPin1, int newPin2) {
@@ -34,8 +35,11 @@ void Motor::setSpeed(int speed) {
 }
 
 //-----MotorDriver------
-MotorDriver::MotorDriver(Motor* motor) {
+MotorDriver::MotorDriver(Motor* motor, int driverEnalePin, int currentMeasurePin) {
   this->motor = motor;
+  this->driverEnalePin = driverEnalePin;
+  this->currentMeasurePin = currentMeasurePin;
+  pinMode(driverEnalePin, OUTPUT);
 }
 
 void MotorDriver::setSpeed(int speed) {
@@ -55,21 +59,13 @@ MotorDriver::getSpeed() {
   return speed;
 }
 
-//-----DriveSystem------
-DriveSystem::DriveSystem(Motor *leftMotor, Motor *rightMotor) {
-  leftDriver = new MotorDriver(leftMotor);
-  rightDriver = new MotorDriver(rightMotor);
+void MotorDriver::enable(boolean enableFlag) {
+  digitalWrite(driverEnalePin, enableFlag ? HIGH : LOW);
 }
 
-int DriveSystem::getLeftSpeed() {
-  return leftDriver->getSpeed();
-}
-
-int DriveSystem::getRightSpeed() {
-  return rightDriver->getSpeed();
-}
-
-void DriveSystem::setSpeed(int leftSpeed, int rightSpeed) {
-  leftDriver->setSpeed(leftSpeed);
-  rightDriver->setSpeed(rightSpeed);
+float MotorDriver::getCurrent() {
+  float currentNow = analogRead(currentMeasurePin);
+  float averageCurrent = (currentNow + prevCurrent) / 2;
+  prevCurrent = averageCurrent;
+  return averageCurrent / CURRENT_COEF;
 }

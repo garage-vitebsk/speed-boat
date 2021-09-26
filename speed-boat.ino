@@ -1,11 +1,13 @@
 #include <PinChangeInterrupt.h>
-#include "L298N.h"
+#include "VNH3SP30.h"
 
 #define LED_PIN 13
 #define LIGHTS_PIN 11
-#define MOTOR_SPEED_PIN 5
-#define DIRECTION_PIN_1 6
-#define DIRECTION_PIN_2 7
+#define DRIVER_CURRENT_ANALOG_PIN 0
+#define MOTOR_SPEED_PIN 3
+#define DIRECTION_PIN_1 4
+#define DIRECTION_PIN_2 5
+#define DRIVER_ENABLE_PIN 6
 #define ACCELERATOR_INPUT_PIN 10
 #define DIRECTION_INPUT_PIN 9
 #define LIGHTS_INPUT_PIN 8
@@ -44,11 +46,12 @@ void setup() {
   digitalWrite(LED_PIN, HIGH);
   digitalWrite(LIGHTS_PIN, LOW);
 
-  motor = new MotorDriver(new Motor(MOTOR_SPEED_PIN, DIRECTION_PIN_1, DIRECTION_PIN_2));
+  motor = new MotorDriver(new Motor(MOTOR_SPEED_PIN, DIRECTION_PIN_1, DIRECTION_PIN_2), DRIVER_ENABLE_PIN, DRIVER_CURRENT_ANALOG_PIN);
   attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channelPin[ACCELERATOR_INPUT_INDEX]), onRisingAccelerator, CHANGE);
   attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channelPin[DIRECTION_INPUT_INDEX]), onRisingDirection, CHANGE);
   attachPinChangeInterrupt(digitalPinToPinChangeInterrupt(channelPin[LIGHTS_INPUT_INDEX]), onRisingLights, CHANGE);
-
+  motor->enable(true);
+  
   digitalWrite(LED_PIN, LOW);
 }
 
@@ -85,6 +88,8 @@ void loop() {
     Serial.print(direction > 0 ? "Forward" : "Reverse");
     Serial.print("\tLights: ");
     Serial.print(lightsState ? "On" : "Off");
+    Serial.print("\tDriver Current (A): ");
+    Serial.print(motor->getCurrent());
     Serial.print("\tRaw: ");
     Serial.print(signalLength[0]);
     Serial.print(", ");

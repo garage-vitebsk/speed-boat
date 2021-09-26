@@ -16,27 +16,16 @@ class Motor {
 
 class MotorDriver {
   public:
-    MotorDriver(Motor*);
+    MotorDriver(Motor*, int, int);
 
     void setSpeed(int);
     int getSpeed();
+    void enable(boolean);
+    float getCurrent();
   private:
     Motor* motor;
     int speed = 0;
-};
-
-class DriveSystem {
-  public:
-    DriveSystem(Motor*, Motor*);
-
-    int getLeftSpeed();
-    int getRightSpeed();
-
-    void setSpeed(int, int);
-  private:
-    MotorDriver *leftDriver;
-    MotorDriver *rightDriver;
-
-    int leftSpeed = 0;
-    int rightSpeed = 0;
+    int driverEnalePin;
+    int currentMeasurePin;
+    float prevCurrent;
 };
